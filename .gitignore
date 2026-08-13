@@ -19,7 +19,7 @@
 *.lol
 *.dvi
 *.ps
-*.pdf
+main.pdf
 build/
 
 # OS files
