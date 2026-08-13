@@ -1,0 +1,55 @@
+\documentclass{CarlosTexRpt}
+
+\title{小型工程报告示例}
+\author{Carlos QU}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+CarlosTexRpt 面向实验记录、设计说明、阶段总结和技术分析等小型中文工程报告。模板强调紧凑、清晰和低维护成本。
+\end{abstract}
+
+\tableofcontents
+
+\chapter{设计目标}
+这是章节标题后的第一段。该段应保持正常的首行缩进，用于验证标题后的正文排版行为已经修复。
+
+这是同一章节中的第二段，用于对照普通段落的首行缩进。
+
+\section{基本能力}
+这是节标题后的第一段，同样应正常首行缩进。类文件内已显式设置标题后的缩进行为，不需要手工添加空命令或特殊占位。
+
+\subsection{公式与单位}
+系统采样频率设为 \SI{200}{\kilo\hertz}，采样周期为 \SI{5}{\micro\second}。示例公式为
+\begin{equation}
+  u = Ri + L\frac{\mathrm{d}i}{\mathrm{d}t}.
+\end{equation}
+
+\section{表格与代码}
+表格采用三线表风格，如表~\ref{tab:params} 所示。
+
+\begin{table}[H]
+  \centering
+  \caption{示例参数}
+  \label{tab:params}
+  \begin{tabular}{lll}
+    \toprule
+    参数 & 符号 & 数值 \\
+    \midrule
+    采样频率 & $f_s$ & \SI{200}{\kilo\hertz} \\
+    母线电压 & $V_{dc}$ & \SI{24}{\volt} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{lstlisting}[language=json,caption={示例配置}]
+{
+  "sample_rate_hz": 200000,
+  "dc_bus_v": 24
+}
+\end{lstlisting}
+
+\end{document}
