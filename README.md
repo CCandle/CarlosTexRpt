@@ -117,7 +117,7 @@ xelatex -output-directory=build main.tex
 
 ## CircuitikZ 电路图（可选）
 
-基础模板默认不加载 CircuitikZ，以保持轻量。需要绘制电路图时，将文档类声明写为 `\\documentclass[circuit]{CarlosTexRpt}`；该选项会加载 CircuitikZ，并采用矩形电阻（`europeanresistors`）与线圈形电感（`cuteinductors`）的混合风格。不要使用全局 `european` 选项，否则电感会变成矩形块。
+基础模板默认不加载 CircuitikZ，以保持轻量。需要绘制电路图时，将文档类声明写为 `\documentclass[circuit]{CarlosTexRpt}`；该选项会加载 CircuitikZ，并采用矩形电阻（`europeanresistors`）与线圈形电感（`cuteinductors`）的混合风格。不要使用全局 `european` 选项，否则电感会变成矩形块。
 
 示例环境直接写 `\\begin{circuitikz} ... \\end{circuitikz}` 即可，不需要在环境上重复指定 `american` 或 `european`。
 
