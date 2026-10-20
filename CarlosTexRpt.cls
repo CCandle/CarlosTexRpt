@@ -5,6 +5,13 @@
 \RequirePackage{iftex}
 \RequireXeTeX
 
+% Circuit diagrams are opt-in so the base report class stays lightweight.
+\newif\ifcarlostexrpt@circuit
+\carlostexrpt@circuitfalse
+\DeclareOption{circuit}{\carlostexrpt@circuittrue}
+\DeclareOption*{\PassOptionsToClass{\CurrentOption}{ctexrep}}
+\ProcessOptions\relax
+
 \LoadClass[UTF8,zihao=-4,openany]{ctexrep}
 
 % -----------------------------------------------------------------------------
@@ -24,6 +31,13 @@
 % -----------------------------------------------------------------------------
 \RequirePackage{amsmath,amssymb,mathtools}
 \RequirePackage{graphicx}
+
+% GB/IEC-oriented mixed defaults: rectangular resistors, coil-shaped inductors.
+% Avoid the global `european` option, which renders inductors as rectangles.
+\ifcarlostexrpt@circuit
+  \RequirePackage[europeanresistors,cuteinductors]{circuitikz}
+\fi
+
 \RequirePackage{booktabs}
 \RequirePackage{longtable}
 \RequirePackage{tabularx}
