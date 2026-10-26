@@ -1,0 +1,583 @@
+\documentclass[circuit]{CarlosTexRpt}
+
+\title{第十二章：三相电路的相量、对称与不对称分析}
+\author{828 电路 · CarlosTexRpt 学习讲义}
+\date{2026-10-26}
+
+\usetikzlibrary{arrows.meta,calc,positioning,angles,quotes}
+\usepackage{enumitem}
+\usepackage{siunitx}
+\sisetup{per-mode=symbol,detect-all}
+
+\newcommand{\jmathu}{\mathrm{j}}
+\newcommand{\phas}[1]{\underline{#1}}
+\newcommand{\Uph}{U_{\mathrm{ph}}}
+\newcommand{\UL}{U_{\mathrm{L}}}
+\newcommand{\Iph}{I_{\mathrm{ph}}}
+\newcommand{\IL}{I_{\mathrm{L}}}
+\newcommand{\Yload}{Z_{\mathrm{Y}}}
+\newcommand{\Dload}{Z_{\Delta}}
+\newcommand{\dgr}{^\circ}
+\newcommand{\jj}{\mathrm{j}}
+
+\newtcolorbox{keybox}[1]{enhanced,breakable,
+  colback=CarlosPanel,colframe=CarlosRule,boxrule=.45pt,
+  arc=1.2mm,left=3mm,right=3mm,top=2mm,bottom=2mm,
+  title={#1},fonttitle=\bfseries\color{CarlosNavy},
+  coltitle=CarlosNavy,before skip=.5em,after skip=.7em}
+\newtcolorbox{warningbox}[1]{enhanced,breakable,
+  colback=CarlosGold!7,colframe=CarlosGold!70!CarlosRule,boxrule=.55pt,
+  arc=1.2mm,left=3mm,right=3mm,top=2mm,bottom=2mm,
+  title={#1},fonttitle=\bfseries\color{CarlosNavy},
+  coltitle=CarlosNavy,before skip=.5em,after skip=.7em}
+\newtcolorbox{examplebox}[1]{enhanced,breakable,
+  colback=white,colframe=CarlosTeal!75!CarlosRule,boxrule=.6pt,
+  arc=1.2mm,left=3mm,right=3mm,top=2mm,bottom=2mm,
+  title={#1},fonttitle=\bfseries\color{CarlosNavy},
+  coltitle=CarlosNavy,before skip=.6em,after skip=.7em}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+本讲义围绕邱关源《电路》第五版第十二章“三相电路”组织，目标不是把 Y/\(\Delta\) 公式做成死记表，而是把每个关系放回相量图和 KCL/KVL 中。内容包括相序、线值与相值、对称三相电路的单相计算、不对称三相电路与中性点位移，以及三相功率和瓦特计法。所有相量均按有效值表示；正序约定为 A 相 \(0^\circ\)、B 相 \(-120^\circ\)、C 相 \(+120^\circ\)。
+\end{abstract}
+
+\tableofcontents
+\clearpage
+\setcounter{chapter}{11}
+\chapter{三相电路的相量、对称与不对称分析}
+
+\section{先统一符号：什么是相量、相值和线值}
+
+\subsection{相量约定}
+
+对称三相电源由三个同频率、等有效值、相位依次相差 \(120^\circ\) 的正弦电压组成。采用正序 ABC，并令 A 相为参考：
+\begin{equation}
+  \phas U_{AN}=U_{\mathrm{ph}}\angle 0\dgr,\qquad
+  \phas U_{BN}=U_{\mathrm{ph}}\angle(-120\dgr),\qquad
+  \phas U_{CN}=U_{\mathrm{ph}}\angle120\dgr.
+  \label{eq:positive-sequence}
+\end{equation}
+因此
+\begin{equation}
+  \boxed{\phas U_{AN}+\phas U_{BN}+\phas U_{CN}=0}.
+  \label{eq:sum-source-voltage}
+\end{equation}
+这里的下标 AN 表示“从 N 指向 A 的电压”，不是 A、N 两个电压幅值相减。
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[>=Stealth,scale=1.12,every node/.style={font=\small}]
+    \coordinate (O) at (0,0);
+    \coordinate (A) at (0:2.15);
+    \coordinate (B) at (-120:2.15);
+    \coordinate (C) at (120:2.15);
+    \draw[->,CarlosMuted!65] (-2.55,0)--(2.65,0) node[right] {$\Re$};
+    \draw[->,CarlosMuted!65] (0,-2.45)--(0,2.55) node[above] {$\Im$};
+    \draw[densely dashed,CarlosRule] (O) circle (2.15);
+    \draw[->,very thick,CarlosBlue] (O)--(A) node[below right=1pt] {$\phas U_{AN}=U\angle0\dgr$};
+    \draw[->,very thick,CarlosTeal] (O)--(B) node[below left=1pt] {$\phas U_{BN}=U\angle-120\dgr$};
+    \draw[->,very thick,CarlosGold!90!black] (O)--(C) node[above left=1pt] {$\phas U_{CN}=U\angle120\dgr$};
+    \fill (O) circle (1.3pt) node[below right=2pt] {$N$};
+    \draw[gray!70] (A) arc[start angle=0,end angle=-120,radius=1.0];
+    \node[gray!80] at (-.1,-1.15) {$120\dgr$};
+  \end{tikzpicture}
+  \caption{正序三相相电压相量图：三个相量等长，依次相差 \(120^\circ\)。}
+\end{figure}
+
+\subsection{正序、逆序和零序}
+
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{正序 ABC：} B 相滞后 A 相 \(120^\circ\)，C 相超前 A 相 \(120^\circ\)。
+  \item \textbf{逆序 ACB：} B、C 的相位位置互换，即 \(U_B=U\angle120^\circ\)、\(U_C=U\angle-120^\circ\)。
+  \item \textbf{零序：} 三个相量同相。它不是普通对称三相电源的正常正序关系；零序电流能否流通还取决于中性线、接地和绕组连接。
+\end{itemize}
+相序不是装饰标签。它决定线电压相对于相电压的 \(30^\circ\) 偏移方向，也决定三相电动机的旋转方向。
+
+\subsection{四个术语必须分开}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{>{\bfseries}p{2.3cm} X X}
+\toprule
+量 & 定义 & 常见对象 \\
+\midrule
+相电压 \(U_{\mathrm{ph}}\) & 某一相电源或负载两端的电压 & Y 接负载的 A 相：\(U_{AN'}\) \\
+线电压 \(U_L\) & 两根线之间的电压 & \(U_{AB}=V_A-V_B\) \\
+相电流 \(I_{\mathrm{ph}}\) & 流过某一相负载支路的电流 & Y 支路电流或 \(\Delta\) 的 AB 支路电流 \\
+线电流 \(I_L\) & 流过外部 A、B、C 相线的电流 & \(I_A,I_B,I_C\) \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{warningbox}{符号防混淆}
+\(U_{AN}\) 是电压相量，\(U_{\mathrm{ph}}=|\phas U_{AN}|\) 是它的有效值大小。后面写 \(U_L=\sqrt3 U_{\mathrm{ph}}\) 时，讨论的是幅值；写 \(\phas U_{AB}=\sqrt3\phas U_{AN}\angle30^\circ\) 时，讨论的是完整相量关系。
+\end{warningbox}
+
+\section{为什么线电压是 \texorpdfstring{$\sqrt3$}{sqrt(3)} 倍，而且偏移 \texorpdfstring{$30^\circ$}{30 degrees}}
+
+对 Y 形电源，线电压由 KVL 得到：
+\begin{equation}
+  \phas U_{AB}=\phas U_{AN}-\phas U_{BN}.
+  \label{eq:line-voltage-difference}
+\end{equation}
+这不是把两个幅值直接相减，而是两个相量相减。对正序电源，代入式 \eqref{eq:positive-sequence}：
+\begin{align}
+  \phas U_{AB}
+  &=U_{\mathrm{ph}}\left(1-e^{-j120\dgr}\right)\\
+  &=\sqrt3 U_{\mathrm{ph}}\angle30\dgr.
+\end{align}
+所以
+\begin{equation}
+  \boxed{\phas U_{AB}=\sqrt3 U_{\mathrm{ph}}\angle30\dgr},\qquad
+  \boxed{U_L=\sqrt3 U_{\mathrm{ph}}}.
+  \label{eq:star-voltage-relation}
+\end{equation}
+另外两个线电压按正序依次旋转 \(-120^\circ\)：
+\begin{equation}
+  \phas U_{BC}=\sqrt3 U_{\mathrm{ph}}\angle(-90\dgr),\quad
+  \phas U_{CA}=\sqrt3 U_{\mathrm{ph}}\angle150\dgr.
+\end{equation}
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[>=Stealth,scale=1.0,every node/.style={font=\small}]
+    \coordinate (O) at (0,0);
+    \coordinate (A) at (0:2.0);
+    \coordinate (B) at (-120:2.0);
+    \coordinate (C) at (120:2.0);
+    \draw[->,CarlosMuted!65] (-1.45,0)--(2.7,0);
+    \draw[->,CarlosMuted!65] (0,-2.3)--(0,2.4);
+    \draw[->,thick,CarlosBlue] (O)--(A) node[below right] {$\phas U_{AN}$};
+    \draw[->,thick,CarlosTeal] (O)--(B) node[below left] {$\phas U_{BN}$};
+    \draw[->,thick,CarlosGold!90!black] (O)--(C) node[above left] {$\phas U_{CN}$};
+    \draw[->,very thick,CarlosNavy] (B)--(A) node[midway,above right=1pt] {$\phas U_{AB}$};
+    \draw[densely dashed,CarlosMuted] (B)--(O);
+    \draw[densely dashed,CarlosMuted] (O)--(A);
+    \draw[->,CarlosMuted] (0.85,0) arc[start angle=0,end angle=30,radius=.85];
+    \node[CarlosMuted] at (1.03,.34) {$30\dgr$};
+    \fill (O) circle (1.3pt) node[below left] {$N$};
+  \end{tikzpicture}
+  \caption{线电压是两个相电压的相量差。\(\phas U_{AB}\) 从 \(\phas U_{BN}\) 的箭头端指向 \(\phas U_{AN}\) 的箭头端。}
+\end{figure}
+
+\begin{keybox}{相量图比背公式更可靠}
+先画 \(U_{AN}\) 在 \(0^\circ\)，再画 \(U_{BN}\) 在 \(-120^\circ\)。把 \(U_{BN}\) 的箭头端连向 \(U_{AN}\) 的箭头端，得到 \(U_{AB}\)。几何上自然得到长度 \(\sqrt3 U_{\mathrm{ph}}\)，方向 \(+30^\circ\)。如果相序反过来，\(30^\circ\) 的方向也反过来。
+\end{keybox}
+
+\subsection{三角形电源或负载的电压关系}
+
+\(\Delta\) 连接的每一相支路直接接在两根线之间，因此
+\begin{equation}
+  \boxed{U_L=U_{\mathrm{ph}}\quad(\Delta\text{ 接})}.
+\end{equation}
+这是拓扑关系，不需要再做相量减法。注意它只说明支路两端电压就是线电压，并不意味着支路电流等于线电流。
+
+\section{Y 与 \texorpdfstring{$\Delta$}{Delta}：线值和相值的完整关系}
+
+\subsection{Y 接负载：电压有 \texorpdfstring{$\sqrt3$}{sqrt3}，电流不变}
+
+在 Y 接负载中，每相阻抗一端接相线，另一端接负载中性点 \(N'\)。外部线电流直接流过该相阻抗，因此
+\begin{equation}
+  \boxed{I_L=I_{\mathrm{ph}}\quad(\mathrm{Y}\text{ 接})}.
+\end{equation}
+对称正序时，若每相负载阻抗 \(Z_Y=|Z_Y|\angle\varphi\)，则
+\begin{align}
+  \phas I_A&=\frac{\phas U_{AN'}}{Z_Y}=I_{\mathrm{ph}}\angle(-\varphi),\\
+  \phas I_B&=I_{\mathrm{ph}}\angle(-120\dgr-\varphi),\\
+  \phas I_C&=I_{\mathrm{ph}}\angle(120\dgr-\varphi).
+\end{align}
+感性负载取 \(\varphi>0\)，电流滞后本相电压；容性负载取 \(\varphi<0\)，电流超前本相电压。
+
+\subsection{\texorpdfstring{$\Delta$}{Delta} 接负载：电压不变，电流有 \texorpdfstring{$\sqrt3$}{sqrt3}}
+
+三角形每个支路直接跨接在两根线之间：
+\begin{equation}
+  \boxed{U_L=U_{\mathrm{ph}}\quad(\Delta\text{ 接})}.
+\end{equation}
+但线电流在节点处由 KCL 决定。规定支路电流方向为 \(I_{AB}:A\to B\)、\(I_{BC}:B\to C\)、\(I_{CA}:C\to A\)，则
+\begin{equation}
+  \boxed{\phas I_A=\phas I_{AB}-\phas I_{CA}},\quad
+  \phas I_B=\phas I_{BC}-\phas I_{AB},\quad
+  \phas I_C=\phas I_{CA}-\phas I_{BC}.
+  \label{eq:delta-line-currents}
+\end{equation}
+对于对称正序负载，三支路电流等幅并相差 \(120^\circ\)。以电阻性负载 \((\varphi=0)\) 示意：\(I_{AB}\) 在 \(+30^\circ\)，\(I_{CA}\) 在 \(+150^\circ\)，二者相减后线电流 \(I_A\) 指向 \(0^\circ\)。因此
+\begin{equation}
+  \boxed{I_L=\sqrt3 I_{\mathrm{ph}}\quad(\Delta\text{ 接})}.
+\end{equation}
+对正序系统，线电流相对于对应支路电流滞后 \(30^\circ\)。
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[>=Stealth,scale=1.02,every node/.style={font=\small}]
+    \coordinate (O) at (0,0);
+    \coordinate (Pab) at (30:1.65);
+    \coordinate (Pca) at (150:1.65);
+    \coordinate (Pa) at (0:2.05);
+    \draw[->,CarlosMuted!65] (-1.4,0)--(2.5,0);
+    \draw[->,CarlosMuted!65] (0,-.35)--(0,2.25);
+    \draw[->,very thick,CarlosBlue] (O)--(Pab) node[above right] {$\phas I_{AB}$};
+    \draw[->,very thick,CarlosGold!90!black] (O)--(Pca) node[above left] {$\phas I_{CA}$};
+    \draw[->,very thick,CarlosTeal] (O)--(Pa) node[below right] {$\phas I_A$};
+    \draw[->,dashed,CarlosNavy] (Pca)--(Pab) node[midway,above] {$\phas I_{AB}-\phas I_{CA}$};
+    \node at (0,-.7) {示意取 $\varphi=0$；所有支路电流同时旋转 $-\varphi$ 后，关系不变。};
+  \end{tikzpicture}
+  \caption{\(\Delta\) 接中，线电流是相邻两支路电流的相量差。}
+\end{figure}
+
+\begin{center}
+\begin{tabularx}{\textwidth}{>{\bfseries}p{2.1cm} X X}
+\toprule
+连接方式 & 电压关系 & 电流关系 \\
+\midrule
+星形 Y & \(U_L=\sqrt3 U_{\mathrm{ph}}\)，正序时线电压超前对应相电压 \(30^\circ\) & \(I_L=I_{\mathrm{ph}}\) \\
+三角形 \(\Delta\) & \(U_L=U_{\mathrm{ph}}\) & \(I_L=\sqrt3 I_{\mathrm{ph}}\)，正序时线电流滞后对应支路电流 \(30^\circ\) \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\section{对称三相电路：为什么可以只算一相}
+
+\subsection{什么条件才叫“对称”}
+
+对称三相电路要求电源对称，且三相负载的对应阻抗相等。若每条线路还有线路阻抗，也要求三相线路阻抗相同。\textbf{只有电源对称，不能保证负载对称。}
+
+在对称系统中，三相相量只是彼此旋转 \(120^\circ\) 的复制品，因此可以先求 A 相，再用相序写出 B、C 相：
+\begin{equation}
+  \phas I_B=\phas I_A\angle(-120\dgr),\qquad
+  \phas I_C=\phas I_A\angle120\dgr.
+\end{equation}
+
+\subsection{Y--Y 连接：建立单相等效电路}
+
+若每相线路阻抗为 \(Z_\ell\)，每相星形负载阻抗为 \(Z_Y\)，则 A 相等效电路为串联关系：
+\begin{equation}
+  \boxed{\phas I_A=\frac{\phas U_{AN}}{Z_\ell+Z_Y}}.
+  \label{eq:balanced-star-current}
+\end{equation}
+负载相电压为
+\begin{equation}
+  \phas U_{A'N'}=\phas I_A Z_Y,
+\end{equation}
+负载线电压再由相量关系得到：
+\begin{equation}
+  \phas U_{A'B'}=\sqrt3\phas U_{A'N'}\angle30\dgr.
+\end{equation}
+如果线路阻抗忽略，则把 \(Z_\ell=0\) 即可。若三相对称，中性线电流
+\begin{equation}
+  \phas I_N=\phas I_A+\phas I_B+\phas I_C=0.
+\end{equation}
+所以在理想对称条件下，中性线可以不影响三相计算；但这不代表不对称负载也可以随意去掉中性线。
+
+\subsection{对称三角形负载}
+
+对于对称 \(\Delta\) 负载，先用线电压计算支路电流：
+\begin{equation}
+  \phas I_{AB}=\frac{\phas U_{AB}}{Z_\Delta},\quad
+  \phas I_{BC}=\frac{\phas U_{BC}}{Z_\Delta},\quad
+  \phas I_{CA}=\frac{\phas U_{CA}}{Z_\Delta}.
+\end{equation}
+再使用式 \eqref{eq:delta-line-currents} 求线电流。如果题目适合转换，也可把对称三角形负载等效成星形负载：
+\begin{equation}
+  \boxed{Z_Y=\frac{Z_\Delta}{3}\quad\text{（对称负载）}}.
+\end{equation}
+然后按单相等效方法计算。不要把“每相阻抗”与“线电流”混为一谈。
+
+\begin{examplebox}{例 1：对称 Y 负载的单相计算}
+三相线电压为 \(380\,\mathrm V\)，每相 Y 负载为 \(Z_Y=12+j9\,\Omega\)，忽略线路阻抗。求线电流和总有功、无功功率。
+
+\textbf{第一步：相电压。}
+\[
+  U_{\mathrm{ph}}=\frac{380}{\sqrt3}=219.4\,\mathrm V.
+\]
+\textbf{第二步：单相电流。}
+\[
+  Z_Y=15\angle36.87\dgr\,\Omega,\qquad
+  \phas I_A=\frac{219.4\angle0\dgr}{15\angle36.87\dgr}
+  =14.63\angle(-36.87\dgr)\,\mathrm A.
+\]
+Y 接时线电流等于相电流，所以 \(I_L=14.63\,\mathrm A\)。功率因数 \(\cos\varphi=12/15=0.8\)。
+\[
+  P=\sqrt3\times380\times14.63\times0.8\approx7.70\,\mathrm{kW},
+\]
+\[
+  Q=\sqrt3\times380\times14.63\times0.6\approx5.78\,\mathrm{kvar}.
+\]
+\end{examplebox}
+
+\section{不对称三相电路：先问中性线在哪里}
+
+不对称意味着三相中至少有一处不相同，例如 \(Z_A\ne Z_B\ne Z_C\)，或者某相断路、短路。即使电源仍然对称，负载电流也不一定等幅或相差 \(120^\circ\)。这时不能把“算 A 相、旋转得到 B/C 相”的简化方法直接套上去。
+
+\subsection{不对称 Y 负载，有理想中性线}
+
+假设电源中性点 N 与负载中性点 N' 由理想导线连接，且忽略线路阻抗。各相负载电压仍等于电源相电压：
+\begin{equation}
+  \phas U_{AN'}=\phas U_{AN},\quad
+  \phas U_{BN'}=\phas U_{BN},\quad
+  \phas U_{CN'}=\phas U_{CN}.
+\end{equation}
+于是分别计算：
+\begin{equation}
+  \phas I_A=\frac{\phas U_{AN}}{Z_A},\quad
+  \phas I_B=\frac{\phas U_{BN}}{Z_B},\quad
+  \phas I_C=\frac{\phas U_{CN}}{Z_C}.
+\end{equation}
+三相电流不一定对称。若把中性线电流方向定义为从负载中性点 N' 流回电源中性点 N，则
+\begin{equation}
+  \boxed{\phas I_N=\phas I_A+\phas I_B+\phas I_C}.
+\end{equation}
+平衡负载时三相电流相量和为零；不平衡时中性线承担它们的矢量和，通常不为零。
+
+\begin{examplebox}{例 2：有中性线时，三相电流可以完全不对称}
+电源相电压为 \(220\,\mathrm V\)，正序。负载为 \(Z_A=10\,\Omega\)、\(Z_B=j10\,\Omega\)、\(Z_C=20\,\Omega\)，中性线理想。
+\[
+\begin{aligned}
+  \phas I_A&=22\angle0\dgr\,\mathrm A,\\
+  \phas I_B&=22\angle150\dgr\,\mathrm A,\\
+  \phas I_C&=11\angle120\dgr\,\mathrm A.
+\end{aligned}
+\]
+三者的幅值和相角明显不符合对称三相电流的关系。相量相加得到
+\[
+  \phas I_N=\phas I_A+\phas I_B+\phas I_C
+  \approx20.7\angle97.1\dgr\,\mathrm A.
+\]
+因此，不能因为电源是对称的，就认定中性线电流为零。
+\end{examplebox}
+
+\subsection{不对称 Y 负载，没有中性线：中性点位移}
+
+若 N 与 N' 断开，负载中性点 N' 不再被固定在电源中性点 N 的电位。这个现象叫\textbf{中性点位移}。令 \(\phas U_{N'N}\) 为负载中性点相对电源中性点的电压，则各相实际负载电压是
+\begin{equation}
+  \phas U_{AN'}=\phas U_{AN}-\phas U_{N'N},
+\end{equation}
+另外两相同理。对负载中性点 N' 写 KCL：
+\begin{equation}
+  \frac{\phas U_{AN}-\phas U_{N'N}}{Z_A}
+ +\frac{\phas U_{BN}-\phas U_{N'N}}{Z_B}
+ +\frac{\phas U_{CN}-\phas U_{N'N}}{Z_C}=0.
+\end{equation}
+令 \(Y_A=1/Z_A\)、\(Y_B=1/Z_B\)、\(Y_C=1/Z_C\)，整理得
+\begin{equation}
+  \boxed{\phas U_{N'N}=\frac{Y_A\phas U_{AN}+Y_B\phas U_{BN}+Y_C\phas U_{CN}}
+  {Y_A+Y_B+Y_C}}.
+  \label{eq:neutral-displacement}
+\end{equation}
+公式的直观含义是：负载中性点电位由三相电压按各相导纳加权决定；导纳越大（阻抗越小）的那一相，对中性点电位的影响越强。
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[>=Stealth,scale=0.92,every node/.style={font=\small}]
+    \coordinate (N) at (0,0);
+    \coordinate (A) at (0:2.25);
+    \coordinate (B) at (-120:2.25);
+    \coordinate (C) at (120:2.25);
+    \coordinate (Np) at (.45,.28);
+    \draw[->,CarlosMuted!50] (-1.5,0)--(2.7,0);
+    \draw[->,CarlosMuted!50] (0,-2.45)--(0,2.55);
+    \draw[->,thick,CarlosRule] (N)--(A) node[below right] {$\phas U_{AN}$};
+    \draw[->,thick,CarlosRule] (N)--(B) node[below left] {$\phas U_{BN}$};
+    \draw[->,thick,CarlosRule] (N)--(C) node[above left] {$\phas U_{CN}$};
+    \draw[->,very thick,CarlosGold!90!black] (N)--(Np) node[midway,above] {$\phas U_{N'N}$};
+    \draw[->,very thick,CarlosBlue] (Np)--(A) node[midway,above right] {$\phas U_{AN'}$};
+    \draw[->,very thick,CarlosTeal] (Np)--(B) node[midway,below] {$\phas U_{BN'}$};
+    \draw[->,very thick,CarlosNavy] (Np)--(C) node[midway,above left] {$\phas U_{CN'}$};
+    \fill (N) circle (1.5pt) node[below left] {$N$};
+    \fill (Np) circle (1.5pt) node[above right] {$N'$};
+  \end{tikzpicture}
+  \caption{中性点位移的相量几何意义（示意图，不按比例）：负载相电压等于电源相电压减去中性点位移电压。}
+\end{figure}
+
+\begin{keybox}{中性线三种情况一眼区分}
+\begin{itemize}[leftmargin=2em]
+  \item \textbf{理想中性线：} \(Z_N=0\)，强制 \(U_{N'N}=0\)，各相负载电压由电源相电压决定。
+  \item \textbf{中性线断开：} \(Z_N\to\infty\)，按式 \eqref{eq:neutral-displacement} 求中性点位移；三相电流仍满足 \(I_A+I_B+I_C=0\)，因为中性线没有电流通路。
+  \item \textbf{中性线阻抗有限：} 中性点仍可能位移，但程度取决于中性线阻抗。按节点法有
+  \[
+    \phas U_{N'N}=\frac{Y_A\phas U_{AN}+Y_B\phas U_{BN}+Y_C\phas U_{CN}}
+    {Y_A+Y_B+Y_C+1/Z_N}.
+  \]
+\end{itemize}
+\end{keybox}
+
+\begin{examplebox}{例 3：断开中性线后，负载相电压会改变}
+正序电源相电压为 \(220\,\mathrm V\)，负载为 \(Z_A=10\,\Omega\)、\(Z_B=Z_C=20\,\Omega\)，中性线断开。此时 \(Y_A=0.1\,\mathrm S\)，\(Y_B=Y_C=0.05\,\mathrm S\)。由于 B、C 两相对称，二者相量和沿负实轴：
+\[
+  \phas U_{N'N}=\frac{0.1(220\angle0\dgr)+0.05(220\angle-120\dgr)+0.05(220\angle120\dgr)}{0.2}
+  =55\angle0\dgr\,\mathrm V.
+\]
+因此 A 相负载电压从 \(220\,\mathrm V\) 变为 \(220-55=165\,\mathrm V\)；B、C 两相的负载电压幅值则升至约 \(252\,\mathrm V\)。这就是中性线断开可能造成某些相过压、另一些相欠压的原因。由于中性点没有电流通路，三相电流的相量和仍为零。
+\end{examplebox}
+
+\subsection{不对称 \texorpdfstring{$\Delta$}{Delta} 负载}
+
+不对称三角形负载中，每个支路阻抗不同，但每个支路仍直接接在线与线之间。理想对称电源下，支路电压由电源线电压确定：
+\begin{equation}
+  \phas I_{AB}=\frac{\phas U_{AB}}{Z_{AB}},\quad
+  \phas I_{BC}=\frac{\phas U_{BC}}{Z_{BC}},\quad
+  \phas I_{CA}=\frac{\phas U_{CA}}{Z_{CA}}.
+\end{equation}
+然后按 KCL 计算线电流：
+\[
+  \phas I_A=\phas I_{AB}-\phas I_{CA},\quad
+  \phas I_B=\phas I_{BC}-\phas I_{AB},\quad
+  \phas I_C=\phas I_{CA}-\phas I_{BC}.
+\]
+\begin{warningbox}{不对称时，不能乱用 \(\sqrt3\)}
+不对称 \(\Delta\) 负载一般不满足 \(I_L=\sqrt3 I_{\mathrm{ph}}\)；不对称 Y 负载一般也不满足三相电流等幅、相差 \(120^\circ\)。\(\sqrt3\) 关系来自对称相量的几何结构，而不是所有三相接线都自动拥有的公式。
+\end{warningbox}
+
+\section{三相功率：先按相求，再看能否化简}
+
+\subsection{最一般、最可靠的功率算法}
+
+用有效值相量时，每相复功率为
+\begin{equation}
+  \phas S_k=\phas U_k\phas I_k^*=P_k+jQ_k.
+\end{equation}
+其中 \(\phas I_k^*\) 是电流相量的共轭。总复功率等于各相复功率之和：
+\begin{equation}
+  \boxed{\phas S_{\mathrm{total}}=\phas S_A+\phas S_B+\phas S_C}.
+\end{equation}
+所以对于\textbf{不对称负载}，先逐相求有功功率与无功功率：
+\begin{align}
+  P&=P_A+P_B+P_C=\sum_k U_k I_k\cos\varphi_k,\\
+  Q&=Q_A+Q_B+Q_C=\sum_k U_k I_k\sin\varphi_k.
+\end{align}
+这里 \(U_k\)、\(I_k\) 是同一相负载的电压和电流有效值，\(\varphi_k\) 是该相电压与电流的相位差。对三角形负载，按 AB、BC、CA 三个支路求和；对星形负载，按 A、B、C 三个相支路求和。
+
+\subsection{对称负载的三相功率公式}
+
+当三相负载对称时，每相的功率相同，故
+\begin{equation}
+  P=3U_{\mathrm{ph}}I_{\mathrm{ph}}\cos\varphi.
+\end{equation}
+结合 Y 或 \(\Delta\) 的线值、相值关系，可以统一写成
+\begin{align}
+  \boxed{P}&=\sqrt3 U_L I_L\cos\varphi,\\
+  \boxed{Q}&=\sqrt3 U_L I_L\sin\varphi,\\
+  \boxed{|S|}&=\sqrt3 U_L I_L,\\
+  \boxed{\phas S}&=P+jQ=\sqrt3 U_L I_L(\cos\varphi+j\sin\varphi).
+\end{align}
+此处 \(\varphi\) 是每相负载电压与相电流之间的夹角。感性负载通常 \(Q>0\)，容性负载通常 \(Q<0\)。
+
+\begin{figure}[H]
+  \centering
+  \begin{tikzpicture}[>=Stealth,scale=1.05,every node/.style={font=\small}]
+    \coordinate (O) at (0,0);
+    \coordinate (P) at (3.2,0);
+    \coordinate (S) at (3.2,1.9);
+    \draw[->,CarlosMuted] (-.2,0)--(3.8,0) node[right] {$P$};
+    \draw[->,CarlosMuted] (0,-.2)--(0,2.55) node[above] {$Q$};
+    \draw[very thick,CarlosBlue] (O)--(S) node[midway,above left] {$|S|$};
+    \draw[thick,CarlosTeal] (O)--(P) node[midway,below] {$P$};
+    \draw[thick,CarlosGold!90!black] (P)--(S) node[midway,right] {$Q$};
+    \draw[->,CarlosMuted] (.9,0) arc[start angle=0,end angle=30.65,radius=.9];
+    \node at (1.15,.34) {$\varphi$};
+    \node[align=left] at (4.7,1.4) {感性：$Q>0$\\容性：$Q<0$};
+  \end{tikzpicture}
+  \caption{三相总功率的功率三角形。只有对称负载时，才可用单一的功率因数角 \(\varphi\) 直接套用线值公式。}
+\end{figure}
+
+\subsection{为什么对称三相的瞬时总功率是常数}
+
+单相正弦负载的瞬时功率会有 \(2\omega\) 脉动。对 A 相，令
+\[
+  u_A=\sqrt2 U_{\mathrm{ph}}\cos\omega t,\qquad
+  i_A=\sqrt2 I_{\mathrm{ph}}\cos(\omega t-\varphi),
+\]
+则
+\begin{equation}
+  p_A=U_{\mathrm{ph}}I_{\mathrm{ph}}\left[\cos\varphi+\cos(2\omega t-\varphi)\right].
+\end{equation}
+B、C 两相的脉动项分别再移相 \(-240^\circ\) 与 \(+240^\circ\)。三个脉动项相加为零，最终
+\begin{equation}
+  \boxed{p_A+p_B+p_C=3U_{\mathrm{ph}}I_{\mathrm{ph}}\cos\varphi=P}.
+\end{equation}
+这叫瞬时功率平衡：对称三相负载的总瞬时功率恒定。它是三相电机产生平稳电磁转矩的重要基础。
+
+\subsection{三相功率测量：二瓦计法}
+
+\textbf{三相三线制}可以用两只功率表测量总有功功率。按经典接线，W1 的电流线圈串入 A 线，电压线圈跨接 A、C；W2 的电流线圈串入 B 线，电压线圈跨接 B、C。两表的\textbf{带符号读数}记为 \(W_1,W_2\)，则不论负载是否对称：
+\begin{equation}
+  \boxed{P=W_1+W_2\qquad\text{（三相三线制）}}.
+\end{equation}
+这一结论适用于三相三线制的不对称负载，因为三根线电流满足 KCL 的约束；它不要求三相负载相同。
+
+对于\textbf{对称负载}，若 \(\varphi\) 是感性负载的滞后角，按上述 W1、W2 接线有
+\begin{align}
+  W_1&=U_LI_L\cos(\varphi-30\dgr),\\
+  W_2&=U_LI_L\cos(\varphi+30\dgr).
+\end{align}
+两式相加、相减可得
+\begin{equation}
+  \boxed{P=W_1+W_2},\qquad
+  \boxed{Q=\sqrt3(W_1-W_2)},
+\end{equation}
+以及
+\begin{equation}
+  \boxed{\tan\varphi=\frac{\sqrt3(W_1-W_2)}{W_1+W_2}}.
+\end{equation}
+\textbf{注意：} \(Q=\sqrt3(W_1-W_2)\) 和由此求出的功率因数角，要求负载对称，并且 W1、W2 的定义与上面接线一致。若交换两只表的电压接线，差值的符号会反过来。
+
+当 \(|\varphi|>60^\circ\)（功率因数小于 0.5）时，其中一只功率表可能出现负读数。计算时必须保留代数符号，不能擅自把负值改成正值再相加。
+
+\subsection{三相四线制不对称负载的功率测量}
+
+三相四线制中性线允许存在非零中性线电流。对不对称负载，常用三瓦计法：每相各测一次相功率，三只表的带符号读数相加：
+\begin{equation}
+  \boxed{P=W_A+W_B+W_C\qquad\text{（三相四线制，三瓦计法）}}.
+\end{equation}
+不要把三相三线制的二瓦计法结论机械套到任意四线制不对称电路。
+
+\begin{examplebox}{例 4：从二瓦计读数求功率}
+某对称三相三线制负载，两只功率表按上述接线的带符号读数为 \(W_1=8\,\mathrm{kW}\)、\(W_2=2\,\mathrm{kW}\)。则
+\[
+  P=W_1+W_2=10\,\mathrm{kW},
+\]
+\[
+  Q=\sqrt3(W_1-W_2)=10.39\,\mathrm{kvar},
+\]
+\[
+  \tan\varphi=\frac{\sqrt3(8-2)}{8+2}=1.039,\qquad
+  \cos\varphi\approx0.693.
+\]
+这里利用了对称负载条件。若负载不对称，仍可用 \(W_1+W_2\) 求总有功功率，但不能只凭两个读数用上述差值公式求总无功功率或单一功率因数角。
+\end{examplebox}
+
+\section{做题时按这个顺序走}
+
+\begin{enumerate}[leftmargin=2.2em,itemsep=.3em]
+  \item \textbf{先认拓扑：} 电源 Y/\(\Delta\)，负载 Y/\(\Delta\)，中性线接着、带阻抗还是断开。
+  \item \textbf{固定相序和参考相：} 通常设 \(\phas U_{AN}=U_{\mathrm{ph}}\angle0^\circ\)，然后写 B、C 相。
+  \item \textbf{先画相量，再列方程：} 线电压用相量差，\(\Delta\) 线电流用 KCL 的相量差；不要对幅值直接加减。
+  \item \textbf{判断能不能单相化：} 只有电源、线路和负载条件对称时，才能利用三相对称性只算一相。
+  \item \textbf{不对称 Y 负载先看中性线：} 中性线存在则按各相电压求电流并算中性线电流；中性线断开则先求中性点位移。
+  \item \textbf{功率最后算：} 对称负载可用 \(\sqrt3 U_LI_L\) 公式；不对称负载按各相复功率求和；测量法要区分三线制和四线制。
+\end{enumerate}
+
+\section{最容易丢分的六个地方}
+
+\begin{enumerate}[leftmargin=2.2em,itemsep=.25em]
+  \item 把线电压当成两个相电压幅值的差，而不是相量差。
+  \item 记住 \(\sqrt3\) 却忘记 \(30^\circ\)；或者正序、逆序的相位偏移方向弄反。
+  \item 把 Y 与 \(\Delta\) 的关系交叉套用：Y 是电压乘 \(\sqrt3\)、电流不变；\(\Delta\) 是电压不变、电流乘 \(\sqrt3\)。
+  \item 看到对称电源就认定负载对称，错误地只算一相。
+  \item 中性线断开时仍令负载相电压等于电源相电压，漏掉中性点位移。
+  \item 对不对称负载直接使用 \(P=\sqrt3 U_LI_L\cos\varphi\) 或 \(Q=\sqrt3 U_LI_L\sin\varphi\)，但实际上不存在统一的单一相角 \(\varphi\)。
+\end{enumerate}
+
+\begin{keybox}{本章最后压缩成三条原则}
+\begin{enumerate}[leftmargin=2em,itemsep=.25em]
+  \item \textbf{相量关系由几何与 KCL/KVL 决定：} Y 的线电压是相电压之差，\(\Delta\) 的线电流是支路电流之差。
+  \item \textbf{能否单相化由对称性决定：} 对称才可旋转得到另外两相；不对称时逐相分析，中性线条件尤其关键。
+  \item \textbf{功率先按相求和：} 对称时才化简成 \(\sqrt3 U_LI_L\cos\varphi\) 等式；测量法的适用条件要单独记清。
+\end{enumerate}
+\end{keybox}
+
+\section*{资料依据与范围说明}
+本讲义是依照邱关源《电路》第五版第十二章 \S12-1 至 \S12-5 的章节结构重新组织的学习笔记，并结合 2027 年中国石油大学（华东）828《电路》考试大纲的三相电路要求。原书章节覆盖三相电源与相序、线值/相值、对称电路计算、不对称电路概念、三相功率与二瓦计法。文中例题为便于解释而重新设定的数值例题，不是原书习题的照录。
+
+\end{document}
