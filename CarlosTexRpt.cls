@@ -30,7 +30,9 @@
 % Mathematics, tables, figures and code
 % -----------------------------------------------------------------------------
 \RequirePackage{amsmath,amssymb,mathtools}
+\everymath{\displaystyle}
 \RequirePackage{graphicx}
+\graphicspath{{img/}{fig/}{pic/}}
 
 % GB/IEC-oriented mixed defaults: rectangular resistors, coil-shaped inductors.
 % Avoid the global `european` option, which renders inductors as rectangles.
